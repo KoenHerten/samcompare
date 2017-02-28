@@ -253,7 +253,7 @@ if __name__ == '__main__':
     print()
     print()
     print("Alignment statistics")
-    print("Mapper1\tMapper2\t{c1}\t{c2}\t{c3}\t{c4}".format(c1="Same_alignment", c2="Read1_clipping", c3="Force1_alignment", c4="Not_same_location"))
+    print("Mapper1\tMapper2\t{c1}\t{c2}\t{c3}\t{c4}".format(c1="Same_alignment", c2="Mapper1_clipping", c3="Mapper1_alignment", c4="Not_same_location"))
     for map1 in samfiles:
         for map2 in samfiles:
             p_dict = cigar_dict[map1]

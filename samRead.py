@@ -44,7 +44,7 @@ class samRead:
     
     @property
     def qname(self):
-        return str(self._linearray[0])
+        return str(self._linearray[0]).split(" ")[0]
         
     @property
     def flag(self):
@@ -52,7 +52,7 @@ class samRead:
         
     @property
     def rname(self):
-        return str(self._linearray[2])
+        return str(self._linearray[2]).split(" ")[0]
         
     @property
     def pos(self):
