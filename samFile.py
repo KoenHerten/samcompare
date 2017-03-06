@@ -36,8 +36,9 @@ class samFile:
         initiate all variables
         '''
         self._file = open(file_name)
+        self._samread = None
         
-    def nextSamRead(self):
+    def _nextSamRead(self):
         line = self._file.readline()
         while (line.startswith("@")):
             #header
@@ -49,11 +50,18 @@ class samFile:
         return samread
         
     def nextPrimaryRead(self):
-        samread = self.nextSamRead()
-
-        while (samread is not None and samread.isSecondaryAlignment()):
-            samread = self.nextSamRead()
+        samread = self._nextSamRead()
+        if (self._samread is None):
+            self._samread = samread
+            return samread
+        while (samread is not None and (samread.isSecondaryAlignment() or (samread.qname == self._samread.qname and not samread.issecond()))):
+        #while (samread is not None and (samread.isSecondaryAlignment())):
+            samread = self._nextSamRead()
+        self._samread = samread
         return samread
+        
+    def getCurrentSamRead(self):
+        return self._samread
         
     def close(self):
         self._file.close()

@@ -117,7 +117,7 @@ if __name__ == '__main__':
     count = 0
     while(not containsNone(samreads)):
         count = count + 1
-        if (args.verbose and count%10000==0):
+        if (args.verbose and count%10==0):
             print("processed {}".format(count))
         #no none in the samreads, so continue
         
@@ -130,6 +130,9 @@ if __name__ == '__main__':
                 name = samreads[sam].qname
                 isfirst = samreads[sam].isfirst()
             if (name != samreads[sam].qname or isfirst != samreads[sam].isfirst()):
+                print("FIRST: {}".format(name))
+                for s  in samreads:
+                    print("{}\t{}".format(s, samreads[s].qname))
                 print("ERROR: not sorted or same readset")
                 exit(1)
         #all same read
