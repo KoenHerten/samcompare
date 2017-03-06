@@ -45,6 +45,7 @@ if __name__ == '__main__':
     #add all arguments
     parser = ArgumentParser(description='samcompare v1.0 comparing samfiles of the sam sample on mapping parameters')
     parser.add_argument('-v', '--verbose', action="store_true")
+    parser.add_argument('-skip', '--skip', action="store_true")
     parser.add_argument('samfiles', type=FileType('r'), nargs='+')
     
     
@@ -125,16 +126,31 @@ if __name__ == '__main__':
         #check if the same name and read
         name = None
         isfirst = True
-        for sam in samreads:
-            if (name is None):
-                name = samreads[sam].qname
-                isfirst = samreads[sam].isfirst()
-            if (name != samreads[sam].qname or isfirst != samreads[sam].isfirst()):
-                print("FIRST: {}".format(name))
-                for s  in samreads:
-                    print("{}\t{}".format(s, samreads[s].qname))
-                print("ERROR: not sorted or same readset")
-                exit(1)
+        same = True
+        check = True
+        while (check):
+            for sam in samreads:
+                if (name is None):
+                    name = samreads[sam].qname
+                    isfirst = samreads[sam].isfirst()
+                same = True
+                if (name != samreads[sam].qname or isfirst != samreads[sam].isfirst()):
+                    same = False
+                    if (args.skip):
+                        print("SKIP")
+                        #skip different reads
+                        name = max(name, samreads[sam].qname)
+                        while (name != samreads[sam].qname and max(name, samreads[sam].qname) == name):
+                            #samread before other
+                            samreads[sam] = samfiles[sam].nextPrimaryRead()
+                    else:
+                        print("FIRST: {}".format(name))
+                        for s  in samreads:
+                            print("{}\t{}".format(s, samreads[s].qname))
+                        print("ERROR: not sorted or same readset")
+                        exit(1)
+            if (same):
+                check = False
         #all same read
         
         #check mapping position
