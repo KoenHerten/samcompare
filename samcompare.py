@@ -61,9 +61,11 @@ if __name__ == '__main__':
     
     samfiles = {}
     for f in args.samfiles:
-        name = str(f.name).strip(".sam")
+        name = str(f.name).rsplit(".",1)[0]
         samfile = samFile.samFile(f.name)
         samfiles[name] = samfile
+        if args.verbose:
+            eprint("Mapping name: {}".format(name))
 
     count = 0
     samreads = {}
@@ -136,18 +138,19 @@ if __name__ == '__main__':
                 same = True
                 if (name != samreads[sam].qname or isfirst != samreads[sam].isfirst()):
                     same = False
-                    if (args.skip):
-                        print("SKIP")
+                    if args.skip:
+                        if args.verbose:
+                            eprint("SKIP")
                         #skip different reads
                         name = max(name, samreads[sam].qname)
                         while (name != samreads[sam].qname and max(name, samreads[sam].qname) == name):
                             #samread before other
                             samreads[sam] = samfiles[sam].nextPrimaryRead()
                     else:
-                        print("FIRST: {}".format(name))
+                        eprint("FIRST: {}".format(name))
                         for s  in samreads:
-                            print("{}\t{}".format(s, samreads[s].qname))
-                        print("ERROR: not sorted or same readset")
+                            eprint("{}\t{}".format(s, samreads[s].qname))
+                        eprint("ERROR: not sorted or same readset")
                         exit(1)
             if (same):
                 check = False
