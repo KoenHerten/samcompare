@@ -45,7 +45,8 @@ if __name__ == '__main__':
     #add all arguments
     parser = ArgumentParser(description='samcompare v1.0 comparing samfiles of the sam sample on mapping parameters')
     parser.add_argument('-v', '--verbose', action="store_true")
-    parser.add_argument('-skip', '--skip', action="store_true")
+    parser.add_argument('-skip', '--skip', action="store_true", help="Skip reads that are not found in all samples (if false, an error is occuring)")
+    parser.add_argument('-ccs', '--ccs', action="store_true", help="These are PacBio CCS reads (fastq description should end with ccs (some mappers add extra numbers, these are removed to get the original query name))")
     parser.add_argument('samfiles', type=FileType('r'), nargs='+')
     
     
@@ -53,6 +54,8 @@ if __name__ == '__main__':
     #if verbose, print the parameters
     if args.verbose:
         eprint("Verbose: {}".format(args.verbose))
+        eprint("Is CCS reads: {}".format(args.ccs))
+        eprint("Skip reads: {}".format(args.skip))
         eprint("Files to parse:")
         for f in args.samfiles:
             eprint("\t{}".format(f.name))
@@ -62,7 +65,7 @@ if __name__ == '__main__':
     samfiles = {}
     for f in args.samfiles:
         name = str(f.name).rsplit(".",1)[0]
-        samfile = samFile.samFile(f.name)
+        samfile = samFile.SamFile(f.name, args.ccs)
         samfiles[name] = samfile
         if args.verbose:
             eprint("Mapping name: {}".format(name))
@@ -118,10 +121,11 @@ if __name__ == '__main__':
 
     
     count = 0
-    while(not containsNone(samreads)):
+    while (not containsNone(samreads)):
         count = count + 1
         if (args.verbose and count%10==0):
-            print("processed {}".format(count))
+            #print("processed {}".format(count))
+            eprint("processed {}".format(count))
         #no none in the samreads, so continue
         
     

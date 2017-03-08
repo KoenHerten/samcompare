@@ -5,46 +5,54 @@ Created on Fri Jan  6 09:51:34 2017
 
 @author: Koen Herten
 
-This is samcompare v1. A tool to compare the output of multiple read mappers
+This is pbunmap v1. A tool to compare the output of multiple read mappers
 
 Copyright 2017, Koen Herten, All rights reserved
 
 This file is part of aftermerge.
 
-samcompare is free software: you can redistribute it and/or modify
+pbunmap is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-samcompare is distributed in the hope that it will be useful,
+pbunmap is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with samcompare.  If not, see <http://www.gnu.org/licenses/>.
+along with pbunmap.  If not, see <http://www.gnu.org/licenses/>.
 
  
 """
 
 
-class samRead:
+class SamRead:
     
-    def __init__(self, line):
+    def __init__(self, line, isCCS = False):
         '''
         initiate all variables
         '''
         self._line = line
         self._linearray = line.split("\t")
         self._binflag = self._tobin()
+        self._isccs = isCCS
         
     @property
     def line(self):
-        return str(self._line)
+        return str("\t".join(self._linearray))
+        #return str(self._line)
     
     @property
     def qname(self):
-        return str(self._linearray[0]).split(" ")[0]
+        name = str(self._linearray[0]).split(" ")[0]
+        if self._isccs:
+            while (not name.endswith("ccs") and name is not None):
+                name = name.rsplit("/",1)[0]
+            if name is None:
+                name = str(self._linearray[0]).split(" ")[0]
+        return name
         
     @property
     def flag(self):
@@ -131,7 +139,7 @@ class samRead:
                 r = "{}{}".format("1",r)
             flag = int(flag / 2)
         i=len(r)
-        while(i<9):
+        while(i<12):
             r= "0{}".format(r)
             i = i+1
         return r
@@ -153,14 +161,14 @@ class samRead:
         function return True if read is secondary alignment
         '''
         binflag = str(self._binflag)
-        return (int(binflag[len(binflag)-9]) == 1)
+        return (int(binflag[-9]) == 1)
             
     def hasMultipleSegments(self):
         '''
         function return True if the read has multiple segments
         '''
         binflag = str(self._binflag)
-        return (int(binflag[len(binflag)-1]) == 1)
+        return (int(binflag[-1]) == 1)
             
     
     def ismapped(self):
@@ -168,7 +176,7 @@ class samRead:
         function return True if this read is mapped
         '''
         binflag = str(self._binflag)
-        return (int(binflag[len(binflag)-3]) == 0)
+        return (int(binflag[-3]) == 0)
     
     
     def ismatemapped(self):
@@ -176,28 +184,50 @@ class samRead:
         function returns True if pair read is mapped
         '''
         binflag = str(self._binflag)
-        return (int(binflag[len(binflag)-4]) == 0)
+        return (int(binflag[-4]) == 0)
     
     def isfirst(self):
         '''
         function returns True if this is the first read in the pair
         '''
         binflag = str(self._binflag)
-        return (int(binflag[len(binflag)-7]) == 1)
+        return (int(binflag[-7]) == 1)
             
     def issecond(self):
         '''
         function returns True if this is the second read in the pair
         '''
         binflag = str(self._binflag)
-        return (int(binflag[len(binflag)-8]) == 1)
+        return (int(binflag[-8]) == 1)
     
     def isreverse(self):
         '''
         function returns True if this read is reverse on the reference genome
         '''
         binflag = str(self._binflag)
-        return (int(binflag[len(binflag)-5]) == 1)
+        return (int(binflag[-5]) == 1)
+    
+    def failed(self):
+        '''
+        function returns True if this read failed
+        '''
+        binflag = str(self._binflag)
+        return (int(binflag[-10]) == 1)
+        
+    def isduplicate(self):
+        '''
+        function returns True if this read failed
+        '''
+        binflag = str(self._binflag)
+        return (int(binflag[-11]) == 1)
+        
+    def issuplementary(self):
+        '''
+        function returns True if this read failed
+        '''
+        binflag = str(self._binflag)
+        return (int(binflag[-12]) == 1)
+        
     
     def longcigar(self):
         '''
@@ -317,6 +347,14 @@ class samRead:
         lcigar = str(self.longcigar())
         return lcigar.count('M') + lcigar.count('D')
         
+    def getMappedLength(self):
+        '''
+        returns the length the sequence mapped to the reference
+        (counting all M and Is in the cigar string)
+        '''
+        lcigar = str(self.longcigar())
+        return lcigar.count('M') + lcigar.count('I')
+        
     def isoverlapping(self, samread):
         '''
         function return True if both reads are overlapping
@@ -366,7 +404,6 @@ class samRead:
         cigarstart = seqstart
         samlcigar = str(secondread.longcigar())
         samlcigar = samlcigar.strip("S")
-        #TODO include I and D into calculations
         changestart = True
         insertions = 0
         while(changestart):
@@ -456,3 +493,22 @@ class samRead:
         else:
             #on same strand
             return self.pos
+            
+    def changeToUnmapped(self):
+        '''
+        change this record to an unmapped read
+        '''
+        #flag
+        self._linearray[1] = "4"
+        #chr
+        self._linearray[2] = "*"
+        #position
+        self._linearray[3] = "0"
+        #quality
+        self._linearray[4] = "0"
+        #cigar
+        self._linearray[5] = "*"
+        #mate information
+        self._linearray[6] = "*"
+        self._linearray[7] = "0"
+        self._linearray[8] = "0"
