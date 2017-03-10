@@ -51,7 +51,7 @@ class SamFile:
         return samread
         
     def nextPrimaryRead(self):
-        samread = self._nextSamRead()
+        samread = self.nextSamRead()
         if (self._samread is None):
             self._samread = samread
             return samread

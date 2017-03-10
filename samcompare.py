@@ -47,6 +47,7 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--verbose', action="store_true")
     parser.add_argument('-skip', '--skip', action="store_true", help="Skip reads that are not found in all samples (if false, an error is occuring)")
     parser.add_argument('-ccs', '--ccs', action="store_true", help="These are PacBio CCS reads (fastq description should end with ccs (some mappers add extra numbers, these are removed to get the original query name))")
+    parser.add_argument('-rmpart', help="Remove this part of the file names", default="")
     parser.add_argument('samfiles', type=FileType('r'), nargs='+')
     
     
@@ -56,6 +57,7 @@ if __name__ == '__main__':
         eprint("Verbose: {}".format(args.verbose))
         eprint("Is CCS reads: {}".format(args.ccs))
         eprint("Skip reads: {}".format(args.skip))
+        eprint("Remove this part of the filenames: {}".format(args.rmpart))
         eprint("Files to parse:")
         for f in args.samfiles:
             eprint("\t{}".format(f.name))
@@ -65,6 +67,7 @@ if __name__ == '__main__':
     samfiles = {}
     for f in args.samfiles:
         name = str(f.name).rsplit(".",1)[0]
+        name = name.replace(args.rmpart, "")
         samfile = samFile.SamFile(f.name, args.ccs)
         samfiles[name] = samfile
         if args.verbose:
