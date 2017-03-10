@@ -8,6 +8,10 @@ This tool compares the output of different mappers on the same dataset, to repor
 All parts of this tool is licenced under GPLv3.  
 A copy of this licence is included under LICENSE.
 
+##Dependencies
+
+samcompare was developed using Python 3.5.2
+
 ##Help
 samcompare is really simple to use:
 The only thing needed is a list of name sorted sam files.
@@ -29,3 +33,18 @@ rm tmp.sam
 python samcompare.py tool1.sam tool2.sam
 
 ```
+
+###Parameters
+
+positional arguments:
+* multiple samfiles (at least 2)
+
+optional arguments:
+option | description
+--- | ---
+  -h, --help |      show this help message and exit
+  -v, --verbose |
+  -skip, --skip | Skip reads that are not found in all samples (if false, an error is occuring)
+  -ccs, --ccs | These are PacBio CCS reads (fastq description should end with ccs (some mappers add extra numbers, these are removed to get the original query name))
+  -rmpart RMPART | Remove this part of the file names (.sam is autoremoved)
+
