@@ -262,6 +262,19 @@ if __name__ == '__main__':
                     p4=(t_dict["this_unmap"]/count)*100, p5=(t_dict["other_unmap"]/count)*100))
     
     print()
+    print("Other Position statistics")
+    print("Mapper1\tMapper2\t{c1}\t{c2}\t{c3}".format(c1="Same_reported", c2="Different", c3="One_mapped"))
+    for map1 in samfiles:
+        for map2 in samfiles:
+            p_dict = position_dict[map1]
+            t_dict = p_dict[map2]
+            print("{map1}\t{map2}\t{c1} ({p1}%)\t{c2} ({p2}%)\t{c3} ({p3}%)".format(map1=map1, map2=map2,
+                  c1=(t_dict["same"] + t_dict["both_unmap"]), p1=((t_dict["same"] + t_dict["both_unmap"])/count)*100,
+                    c2=t_dict["diff"], p2=(t_dict["diff"]/count)*100,
+                    c3=(t_dict["this_unmap"] + t_dict["other_unmap"]), p3=((t_dict["this_unmap"] + t_dict["other_unmap"])/count)*100))
+            
+            
+    print()
     print()
     #print mapping quality
     print("Mappinq quality statistics")
